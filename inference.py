@@ -5,21 +5,14 @@ import json
 from glob import glob
 import SimpleITK
 import numpy as np
+from scipy.special import logit
+import joblib
 from processor import MalignancyProcessor
 
 
-# Auto-detect environment and set paths accordingly
-import os
-if os.path.exists("/input"):
-    # Docker container environment
-    INPUT_PATH = Path("/input")
-    OUTPUT_PATH = Path("/output")
-    RESOURCE_PATH = Path("/opt/app/resources")
-else:
-    # Local testing environment
-    INPUT_PATH = Path("./test/input")
-    OUTPUT_PATH = Path("./test/output")
-    RESOURCE_PATH = Path("./resources")
+INPUT_PATH = Path("/input")
+OUTPUT_PATH = Path("/output")
+RESOURCE_PATH = Path("/opt/app/resources")
 
 def transform(input_image, point):
     """
@@ -82,19 +75,19 @@ def itk_image_to_numpy_image(input_image):
 
 
 class NoduleProcessor:
-    def __init__(self, ct_image_file, nodule_locations, clinical_information, mode="ConvNextLSTM", model_name="LUNA25-baseline-ConvNextLSTM"):
+    def __init__(self, ct_image_file, nodule_locations, clinical_information, mode="2D", model_name="LUNA25-baseline-2D"):
         """
         Parameters
         ----------
         ct_image_file: Path to the CT image file
         nodule_locations: Dictionary containing nodule coordinates and annotationIDs
         clinical_information: Dictionary containing clinical information (Age and Gender)
-        mode: ConvNextLSTM, 2D or 3D
+        mode: 2D or 3D
         model_name: Name of the model to be used for prediction
         """
         self._image_file = ct_image_file
         self.nodule_locations = nodule_locations
-        self.clinical_information = clinical_information
+        self.clinical_information =clinical_information
         self.mode = mode
         self.model_name = model_name
 
@@ -175,7 +168,7 @@ class NoduleProcessor:
         return results
 
 
-def run(mode="ConvNextLSTM", model_name="LUNA25-baseline-ConvNextLSTM"):
+def run(mode="2D", model_name="LUNA25-baseline-2D"):
     # Read the inputs
     input_nodule_locations = load_json_file(
         location=INPUT_PATH / "nodule-locations.json",
@@ -203,7 +196,7 @@ def run(mode="ConvNextLSTM", model_name="LUNA25-baseline-ConvNextLSTM"):
 
     # Save your output
     write_json_file(
-        location=OUTPUT_PATH / "lung-nodule-malignancy-likelihoods.json",
+        location=OUTPUT_PATH / "lung-nodule-malginancy-likelihoods.json",
         content=malignancy_risks,
     )
     print(f"Completed writing output to {OUTPUT_PATH}")
@@ -257,7 +250,7 @@ def _show_torch_cuda_info():
 
 
 if __name__ == "__main__":
-    mode = "ConvNextLSTM"
-    model_name = "LUNA25-baseline-ConvNextLSTM"
-    raise SystemExit(run(mode=mode,
+    mode = "2D"
+    model_name = "LUNA25-baseline-2D-20250225"
+    raise SystemExit(run(mode= mode,
                          model_name=model_name))
