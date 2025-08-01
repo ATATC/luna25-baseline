@@ -1,16 +1,15 @@
 """
 Inference script for predicting malignancy of lung nodules
 """
-import numpy as np
-import dataloader
-import torch
-import torch.nn as nn
-from torchvision import models
-from models.model_3d import I3D
-from models.model_2d import ResNet18
-import os
-import math
 import logging
+import os
+
+import numpy as np
+import torch
+
+import dataloader
+from models.model_2d import ResNet18
+from models.model_3d import ConvNextLSTM
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -39,7 +38,7 @@ class MalignancyProcessor:
         if self.mode == "2D":
             self.model_2d = ResNet18(weights=None).cuda()
         elif self.mode == "3D":
-            self.model_3d = I3D(num_classes=1, pre_trained=False, input_channels=3).cuda()
+            self.model_3d = ConvNextLSTM().cuda()
 
         self.model_root = "/opt/app/resources/"
 
